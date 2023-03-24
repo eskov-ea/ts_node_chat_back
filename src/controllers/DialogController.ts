@@ -1,5 +1,6 @@
 import express from 'express';
-import {Socket, Server} from 'socket.io';
+import {Server} from 'socket.io';
+import { IDialog } from '../models/Dialog.js';
 import { DialogModel, MessageModel } from '../models/index.js';
 
 class DialogController {
@@ -21,7 +22,7 @@ class DialogController {
           path: 'user',
         },
       })
-      .exec(function (err, dialogs) {
+      .exec(function (err: any, dialogs: any) {
         if (err) {
           return res.status(404).json({
             message: 'Dialogs not found',
@@ -44,7 +45,7 @@ class DialogController {
           path: 'user',
         },
       })
-      .exec(function (err, dialogs) {
+      .exec(function (err: any, dialogs: any) {
         if (err) {
           return res.status(404).json({
             message: 'Dialogs not found',
@@ -66,7 +67,7 @@ class DialogController {
         author: req.body.user._id,
         partner: req.body.partner._id,
       },
-      (err, dialog) => {
+      (err: any, dialog: IDialog) => {
         if (err) {
           return res.status(500).json({
             status: 'error',
@@ -83,7 +84,7 @@ class DialogController {
 
           dialog
             .save()
-            .then((dialogObj) => {
+            .then((dialogObj: any) => {
               const message = new MessageModel({
                 text: req.body.text,
                 user: req.user._id,
@@ -102,11 +103,11 @@ class DialogController {
                     });
                   });
                 })
-                .catch((reason) => {
+                .catch((reason: any) => {
                   res.json(reason);
                 });
             })
-            .catch((err) => {
+            .catch((err: any) => {
               res.json({
                 status: 'error',
                 message: err,
@@ -120,7 +121,7 @@ class DialogController {
   delete = (req: express.Request, res: express.Response): void => {
     const id = req.params.id;
     DialogModel.findOneAndRemove({ _id: id })
-      .then((dialog) => {
+      .then((dialog: any) => {
         if (dialog) {
           res.json({
             message: `Dialog deleted`,

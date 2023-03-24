@@ -1,7 +1,16 @@
 import mngs from 'mongoose';
 const {Schema, model} = mngs;
+import { IMessage } from "./Message";
+import { IUser } from "./User";
 
-
+export interface IUploadFile {
+  filename: string;
+  size: number;
+  ext: string;
+  url: string;
+  message: IMessage | string;
+  user: IUser | string;
+}
 
 const UploadFileSchema = new Schema(
   {

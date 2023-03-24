@@ -1,5 +1,13 @@
-import mngs from 'mongoose';
-const {Schema, model} = mngs;
+import mongoose, { Schema, Document } from "mongoose";
+import { IDialog } from "./Dialog";
+
+
+export interface IMessage extends Document {
+  _id: any;
+  text: string;
+  dialog: IDialog | string;
+  read: boolean;
+}
 
 const MessageSchema = new Schema(
   {
@@ -18,6 +26,6 @@ const MessageSchema = new Schema(
   }
 );
 
-const MessageModel = model("Message", MessageSchema);
+const MessageModel = mongoose.model<IMessage>("Message", MessageSchema);
 
 export default MessageModel;

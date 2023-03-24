@@ -1,12 +1,12 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import {Socket, Server} from "socket.io";
+import {Server} from "socket.io";
 import { validationResult } from "express-validator";
 // import mailer from "../core/mailer";
 
-import UserModel from "../models/User.js";
+import UserModel, { IUser } from "../models/User";
 // import { IUser } from "../models/User";
-import  createJWToken  from "../utils/createJWToken.js";
+import  createJWToken  from "../utils/createJWToken";
 // import { SentMessageInfo } from "nodemailer/lib/sendmail-transport";
 
 class UserController {
@@ -18,7 +18,7 @@ class UserController {
 
   show = (req: express.Request, res: express.Response): void => {
     const id = req.params.id;
-    UserModel.findById(id, (err, user) => {
+    UserModel.findById(id, (err: any, user: IUser) => {
       if (err) {
         return res.status(404).json({
           message: "User not found",
@@ -31,7 +31,7 @@ class UserController {
   getMe = (req: express.Request, res: express.Response): void => {
     const id = req.body && req.body._id;
     console.log(id)
-    UserModel.findById(id, (err, user) => {
+    UserModel.findById(id, (err: any, user: IUser) => {
       if (err || !user) {
         return res.status(404).json({
           message: "User not found",
@@ -42,7 +42,7 @@ class UserController {
   };
 
   findUsers = (req: express.Request, res: express.Response): void => {
-    const query = req.query.query;
+    const query: string = req.query.query as string;
     UserModel.find()
       .or([
         { fullname: new RegExp(query, "i") },
@@ -94,7 +94,7 @@ class UserController {
       const user = new UserModel(postData);
       user
         .save()
-        .then((obj) => {
+        .then((obj: IUser) => {
           console.log(obj)
           res.json(obj);
           // mailer.sendMail(
@@ -113,7 +113,7 @@ class UserController {
           //   }
           // );
         })
-        .catch((reason) => {
+        .catch((reason: any) => {
           console.log(reason)
           res.status(500).json({
             status: "error",
@@ -124,12 +124,12 @@ class UserController {
   };
 
   verify = (req: express.Request, res: express.Response): void => {
-    const hash = req.query.hash;
+    const hash: string = req.query.hash as string;
 
     if (!hash) {
       res.status(422).json({ errors: "Invalid hash" });
     } else {
-      UserModel.findOne({ confirm_hash: hash }, (err, user) => {
+      UserModel.findOne({ confirm_hash: hash }, (err: any, user: IUser) => {
         if (err || !user) {
           return res.status(404).json({
             status: "error",
@@ -138,7 +138,7 @@ class UserController {
         }
 
         user.confirmed = true;
-        user.save((err) => {
+        user.save((err: any) => {
           if (err) {
             return res.status(404).json({
               status: "error",
@@ -166,7 +166,7 @@ class UserController {
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      UserModel.findOne({ email: postData.email }, (err, user) => {
+      UserModel.findOne({ email: postData.email }, (err: any, user: IUser) => {
         if (err || !user) {
           return res.status(404).json({
             message: "User not found",

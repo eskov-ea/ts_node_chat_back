@@ -2,10 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 dotenv.config();
-import {Socket} from 'socket.io';
-
-
-import './core/db.js';
 import createRoutes from './core/routes.js';
 import {SocServer} from './core/socket.js';
 

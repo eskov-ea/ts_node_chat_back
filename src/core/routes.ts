@@ -1,7 +1,6 @@
 import bodyParser from "body-parser";
 import express from "express";
-import {Socket, Server} from "socket.io";
-import { dirname } from 'path';
+import {Server} from "socket.io";
 // import { updateLastSeen, checkAuth } from "../middlewares";
 import { loginValidation, registerValidation } from "../utils/validations/index.js";
 // import UserCtrl from "../controllers/UserController.js";
@@ -21,15 +20,15 @@ const createRoutes = (app: express.Express, io: Server) => {
   // app.use(updateLastSeen);
   
   const prefix = "/api";
-  app.get(prefix + "/", (req: express.Request, res: express.Response) => {
+  app.get(prefix + "/", (_: express.Request, res: express.Response) => {
     res.send("Hello, World!");
   });
 
 
-  app.get("/api", (req: express.Request, res: express.Response) => {
+  app.get("/api", (_: express.Request, res: express.Response) => {
     res.send("Hello, World!");
   });
-  app.get(prefix + "/client", (req: express.Request, res: express.Response) => {
+  app.get(prefix + "/client", (_: express.Request, res: express.Response) => {
     res.sendFile('/var/www/webpushes/node_chat_back/' + 'index.html');
   });
 

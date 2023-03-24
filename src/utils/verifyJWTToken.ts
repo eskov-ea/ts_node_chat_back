@@ -16,10 +16,10 @@ export default (token: string): Promise<DecodedData | null> =>
       jwt.verify(
         token,
         process.env.JWT_SECRET || "",
-        (err: VerifyErrors, decodedData) => {
+        (err, decodedData) => {
           if (err || !decodedData) {
-            return reject(err);
-          }
+            return reject(err as VerifyErrors);
+          } 
 
           resolve(decodedData as DecodedData);
         }

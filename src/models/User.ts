@@ -1,15 +1,25 @@
-import mngs from 'mongoose';
-const {Schema, model} = mngs;
-import isEmail from 'validator/lib/isEmail.js';
+import mongoose, { Schema, Document } from "mongoose";
+import  validator from "validator";
 import generatePasswordHash from "../utils/generatePasswordHash.js";
 import date from "date-fns";
+
+export interface IUser extends Document {
+  email: string;
+  fullname: string;
+  password: string;
+  confirmed: boolean;
+  avatar: string;
+  confirm_hash: string;
+  last_seen: Date;
+  data?: IUser;
+}
 
 const UserSchema = new Schema(
   {
     email: {
       type: String,
       require: "Email address is required",
-      validate: [isEmail, "Invalid email"],
+      validate: [validator.isEmail, "Invalid email"],
       unique: true,
     },
     fullname: {
@@ -36,7 +46,7 @@ const UserSchema = new Schema(
   }
 );
 
-UserSchema.virtual("isOnline").get(function () {
+UserSchema.virtual("isOnline").get(function (this: any) {
   return date.differenceInMinutes(new Date(), this.last_seen) < 5;
 });
 
@@ -44,18 +54,18 @@ UserSchema.set("toJSON", {
   virtuals: true,
 });
 
-UserSchema.pre("save", async function (next) {
+UserSchema.pre<IUser>("save", async function (next) {
   const user = this;
 
   if (!user.isModified("password")) {
     return next();
   }
 
-  user.password = await generatePasswordHash(user.password);
-  user.confirm_hash = await generatePasswordHash(new Date().toString());
+  user.password = await generatePasswordHash(user.password) as string;
+  user.confirm_hash = await generatePasswordHash(new Date().toString()) as string;
 });
 
-const UserModel = model("User", UserSchema);
+const UserModel = mongoose.model<IUser>("User", UserSchema);
 
 export default UserModel;
 

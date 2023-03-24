@@ -1,18 +1,18 @@
-import {Server, Socket} from 'socket.io';
+import socket from 'socket.io';
 import http from 'http';
 
 
 export const SocServer = ( http: http.Server) => {
-  const io = new Server(http);
+  const io = socket(http);
   // io.clients = {};
 
-  io.on("connect_error", (err) => {
+  io.on("connect_error", (err: any) => {
     console.log(`connect_error due to ${err.message}`);
   });
 
   io.on('connection', function(socket: any) {
     console.log('Socket connection established')
-    socket.on('SIGNIN', (id) => {
+    socket.on('SIGNIN', () => {
       // io.clients[id] = socket;
 //console.log(io.clients);
     });
@@ -22,7 +22,7 @@ export const SocServer = ( http: http.Server) => {
       socket.join(dialogId);
     });
 
-    socket.on('DIALOGS:TYPING', (obj) => {
+    socket.on('DIALOGS:TYPING', (obj: any) => {
       socket.broadcast.emit('DIALOGS:TYPING', obj);
     });
   });

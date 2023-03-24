@@ -1,7 +1,8 @@
 import express from "express";
-import {Socket, Server} from "socket.io";
+import {Server} from "socket.io";
 
 import { MessageModel, DialogModel } from "../models/index.js";
+import { IMessage } from "../models/Message.js";
 
 class MessageController {
   io: Server;
@@ -15,7 +16,8 @@ class MessageController {
     MessageModel.updateMany(
       { dialog: dialogId, user: { $ne: userId } },
       { $set: { read: true } },
-      (err) => {
+      {},
+      (err: any): void => {
         if (err) {
           res.status(500).json({
             status: "error",
@@ -32,8 +34,8 @@ class MessageController {
   };
 
   index = (req: express.Request, res: express.Response): void => {
-    const dialogId = req.query.dialog;
-    const userId = req.query._id;
+    const dialogId: string = req.query.dialog as string;
+    const userId: string = req.query._id as string;
     this.updateReadStatus(res, userId, dialogId);
 
     MessageModel.find({ dialog: dialogId })
@@ -68,10 +70,10 @@ class MessageController {
 
     message
       .save()
-      .then((obj) => {
+      .then((obj: IMessage) => {
         obj.populate(
           "dialog user attachments",
-          (err, message) => {
+          (err: any, message: IMessage) => {
             if (err) {
               return res.status(500).json({
                 status: "error",
@@ -106,10 +108,10 @@ class MessageController {
   };
 
   delete = (req: express.Request, res: express.Response): void => {
-    const id = req.body.messageId;
-    const userId = req.body.userId;
+    const id: string = req.body.messageId;
+    const userId: string = req.body.userId;
 
-    MessageModel.findById(id, (err, message) => {
+    MessageModel.findById(id, (err: any, message: any) => {
       if (err || !message) {
         return res.status(404).json({
           status: "error",
@@ -133,7 +135,7 @@ class MessageController {
               });
             }
 
-            DialogModel.findById(dialogId, (err, dialog) => {
+            DialogModel.findById(dialogId, (err: any, dialog: any) => {
               if (err) {
                 res.status(500).json({
                   status: "error",

@@ -4,7 +4,14 @@ import {Server} from "socket.io";
 import { MessageModel, DialogModel } from "../models/index.js";
 import { IMessage } from "../models/Message.js";
 
-class MessageController {
+interface MessageControllerI {
+  create: Function;
+  delete: Function;
+  getMessages: Function;
+  updateReadStatus: Function;
+}
+
+class MessageController implements MessageControllerI {
   io: Server;
 
   constructor(io: Server) {
@@ -33,11 +40,12 @@ class MessageController {
     );
   };
 
-  index = (req: express.Request, res: express.Response): void => {
+  getMessages = (req: express.Request, res: express.Response): void => {
     const dialogId: string = req.query.dialog as string;
     const userId: string = req.query._id as string;
     this.updateReadStatus(res, userId, dialogId);
-
+    console.log("Get messages:  " + userId + "  " + dialogId);
+    
     MessageModel.find({ dialog: dialogId })
      // .sort({"updatedAt": -1})
       .populate(["dialog", "user", "attachments"])
@@ -55,13 +63,13 @@ class MessageController {
   };
 
   create = (req: express.Request, res: express.Response): void => {
-    const userId = req.body.userId;
+    const userId = req.body.user_id;
 
     const postData = {
       text: req.body.text,
       dialog: req.body.dialog_id,
       attachments: req.body.attachments,
-      user: userId,
+      author: userId,
     };
     const message = new MessageModel(postData);
 
@@ -80,18 +88,21 @@ class MessageController {
                 message: err,
               });
             }
+            console.log("Update last message:   " + message._id + "   " + message.dialog);
+            
 
             DialogModel.findOneAndUpdate(
               { _id: postData.dialog },
               { lastMessage: message._id },
               { upsert: true },
-              function (err) {
+              function (err, dialog) {
                 if (err) {
                   return res.status(500).json({
                     status: "error",
                     message: err,
                   });
                 }
+                console.log("Update last message:   " + message._id + "   " + dialog);
               }
             );
 
@@ -108,9 +119,10 @@ class MessageController {
   };
 
   delete = (req: express.Request, res: express.Response): void => {
-    const id: string = req.body.messageId;
-    const userId: string = req.body.userId;
-
+    const id: string = req.body.message_id;
+    const userId: string = req.body.user_id;
+    console.log("Delete message:  " + id + "  " + userId);
+    
     MessageModel.findById(id, (err: any, message: any) => {
       if (err || !message) {
         return res.status(404).json({
@@ -119,7 +131,7 @@ class MessageController {
         });
       }
 
-      if (message.user.toString() === userId) {
+      if (message.author.toString() === userId) {
         const dialogId = message.dialog;
         message.remove();
 
@@ -150,7 +162,7 @@ class MessageController {
                 });
               }
 
-              dialog.lastMessage = lastMessage ? lastMessage.toString() : "";
+              dialog.lastMessage = lastMessage ? lastMessage._id.toString() : "";
               dialog.save();
             });
           }

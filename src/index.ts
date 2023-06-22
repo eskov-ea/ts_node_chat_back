@@ -4,6 +4,7 @@ import { createServer } from 'http';
 dotenv.config();
 import createRoutes from './core/routes.js';
 import {SocServer} from './core/socket.js';
+import './core/db.js';
 
 const app = express();
 const http = createServer(app);

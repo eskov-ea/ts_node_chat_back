@@ -7,6 +7,7 @@ export interface IUploadFile {
   filename: string;
   size: number;
   ext: string;
+  preview_base64: string;
   url: string;
   message: IMessage | string;
   user: IUser | string;

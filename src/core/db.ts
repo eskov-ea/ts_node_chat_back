@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 mongoose.connect(
   "mongodb://chat:chat@localhost:27017/chat",
   {
-    // useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useFindAndModify: false,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
   },
   (err) => {
     if (err) {

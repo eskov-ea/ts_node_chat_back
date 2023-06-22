@@ -7,6 +7,7 @@ import { validationResult } from "express-validator";
 import UserModel, { IUser } from "../models/User";
 // import { IUser } from "../models/User";
 import  createJWToken  from "../utils/createJWToken";
+import DeviceTokenModel, { IDeviceToken } from "../models/DeviceToken";
 // import { SentMessageInfo } from "nodemailer/lib/sendmail-transport";
 
 class UserController {
@@ -30,7 +31,7 @@ class UserController {
 
   getMe = (req: express.Request, res: express.Response): void => {
     const id = req.body && req.body._id;
-    console.log(id)
+    console.log("Get me: " + id);
     UserModel.findById(id, (err: any, user: IUser) => {
       if (err || !user) {
         return res.status(404).json({
@@ -155,16 +156,22 @@ class UserController {
     }
   };
 
+  checkAuth = (req: express.Request, res: express.Response): void => {
+    res.status(200).json({
+      status: "success"
+    });
+  }
+
   login = (req: express.Request, res: express.Response): void => {
     const postData = {
       email: req.body.email,
       password: req.body.password,
     };
-
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      res.status(422).json({ errors: errors.array() });
+
+    res.status(422).json({ errors: errors.array() });
     } else {
       UserModel.findOne({ email: postData.email }, (err: any, user: IUser) => {
         if (err || !user) {
@@ -175,10 +182,54 @@ class UserController {
 
         if (bcrypt.compareSync(postData.password, user.password)) {
           const token = createJWToken(user);
-          res.json({
-            status: "success",
-            token,
-          });
+
+          const deviceTokenString = req.body.device_token;
+          if (deviceTokenString) {
+            DeviceTokenModel.findOne({ token: deviceTokenString }, (err: any, deviceToken: IDeviceToken) => {
+              if (err) {
+                //TODO: implement Exception cannot store device token
+                return res.json({
+                  status: "warning",
+                  token,
+                  user
+                });
+              } else if (deviceToken) {
+                return res.json({
+                  status: "success",
+                  token,
+                  user
+                });
+              } else {
+                const newDeviceToken = new DeviceTokenModel({
+                  user: user,
+                  token: deviceTokenString
+                });
+                newDeviceToken.save((err: any) => {
+                  if (err) {
+                    //TODO: implement Exception cannot store device token
+                    res.json({
+                      status: "warning",
+                      token,
+                      user
+                    });
+                  } else {
+                    res.json({
+                      status: "success",
+                      token,
+                      user
+                    });
+                  }
+                });
+              }
+            });
+          } else {
+            res.json({
+              status: "success",
+              token,
+              user
+            });
+          }
+
         } else {
           res.status(403).json({
             status: "error",

@@ -32,7 +32,7 @@ const createRoutes = (app: express.Express, io: Server) => {
   //   res.sendFile('/var/www/webpushes/node_chat_back/' + 'index.html');
   // });
 
-  app.get(prefix + "/user/me", UserController.getMe);
+  // app.get(prefix + "/user/me", UserController.getMe);
   // app.get("/user/verify", UserController.verify);
   app.post(prefix + "/user/signup", registerValidation, UserController.create);
   app.post(prefix + "/user/signin", loginValidation, UserController.login);
@@ -41,8 +41,8 @@ const createRoutes = (app: express.Express, io: Server) => {
   app.get(prefix + "/user/:id", UserController.show);
   // app.delete("/user/:id", UserController.delete);
   
-  app.get(prefix + "/dialogs/:id", DialogController.index);
-  app.get(prefix + "/dialogs/find", DialogController.findDialogByUserId);
+  app.get(prefix + "/dialogs/find", DialogController.findDialogById);
+  app.get(prefix + "/dialogs/:id", DialogController.getDialogs);
   app.delete(prefix + "/dialogs/:id", DialogController.delete);
   app.post(prefix + "/dialogs", DialogController.create);
   app.post(prefix + "/dialogs/type", DialogController.createType);

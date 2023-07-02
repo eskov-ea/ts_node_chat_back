@@ -12,17 +12,20 @@ class DialogController {
     this.io = io;
   }
 
-  index = (req: express.Request, res: express.Response): void => {
-  const dialogId = req.params.id;
+  getDialogs = (req: express.Request, res: express.Response): void => {
+  const id = req.params.id;
 	console.log("request params:  " + req.params.id);
     DialogModel.find()
-      .or({ _id: dialogId })
-      .populate(['author', 'partner'])
+      .or([{ author: id }, {partners: id}])
+      .populate(['user', 'partner'])
       .populate({
         path: 'lastMessage',
         populate: {
           path: 'user',
         },
+      })
+      .populate({
+        path: 'dialog_type'
       })
       .exec(function (err: any, dialogs: any) {
         console.log("find dialog:  " + dialogs);
@@ -31,15 +34,14 @@ class DialogController {
             message: 'Dialogs not found',
           });
         }
+        console.log("GET dialogs   " + dialogs)
         return res.json(dialogs);
       });
   };
-  findDialogByUserId = (req: express.Request, res: express.Response): void => {
-    const id = req.params.id;
-    console.log("request params:  " + req.params.id);
-      DialogModel.find([{ author: id }, {partner: id}])
-        .or([{ author: id }, {partner: id}])
-        .populate(['author', 'partner'])
+  findDialogById = (req: express.Request, res: express.Response): void => {
+    const id: string = req.query.query as string;
+    console.log("findDialogById request params:  " + id);
+      DialogModel.find({_id: id})
         .populate({
           path: 'lastMessage',
           populate: {
@@ -50,7 +52,7 @@ class DialogController {
           console.log("find dialog:  " + dialogs);
           if (err) {
             return res.status(404).json({
-              message: 'Dialogs not found',
+              message: 'Dialog not found',
             });
           }
           return res.json(dialogs);
@@ -82,7 +84,6 @@ class DialogController {
   findDialog = (req: express.Request, res: express.Response): void => {
     const userId = req.params.userId;
     const partnerId = req.params.partnerId;
-
     DialogModel.find()
       .or([{author: userId, partner: partnerId}, {author: partnerId, partner: userId}])
       .populate(['author', 'partner'])
@@ -105,8 +106,8 @@ class DialogController {
   create = (req: express.Request, res: express.Response): void => {
     console.log(req.body)
     const postData = {
-      author: req.body.userId,
-      partners: req.body.partnerId,
+      author: req.body.user_id,
+      partners: req.body.partner_id, 
       message: req.body.message,
       dialog_type: undefined
     };
@@ -114,7 +115,7 @@ class DialogController {
 
     DialogTypeModel.findOne(
       {
-        dialog_type_id: req.body.dialogType
+        dialog_type_id: req.body.dialog_type
       },
       (err: any, dialogType: IDialogType) => {
         if (err) {
@@ -126,7 +127,7 @@ class DialogController {
           postData.dialog_type = dialogType._id;
           return
         } else {
-          console.log("DialogType:  " +req.body.dialogType);
+          console.log("DialogType:  " +req.body.dialog_type);
           return res.status(500).json({
             status: 'error',
             message: 'No dialog type found',
@@ -136,8 +137,8 @@ class DialogController {
     );
     DialogModel.findOne(
       {
-        author: req.body.userId,
-        partners: req.body.partnerId,
+        author: postData.author,
+        partners: postData.partners,
         dialogType: postData.dialog_type
       },
       (err: any, dialog: IDialog) => {

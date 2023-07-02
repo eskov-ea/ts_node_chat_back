@@ -19,13 +19,17 @@ class UserController {
 
   show = (req: express.Request, res: express.Response): void => {
     const id = req.params.id;
-    UserModel.findById(id, (err: any, user: IUser) => {
+    UserModel.findById(id, {password: 0, confirm_hash: 0})
+    .exec(function (err: any, user: any){
       if (err) {
         return res.status(404).json({
           message: "User not found",
         });
+      } else {
+        return res.status(200).json({
+          user
+        });
       }
-      res.json(user);
     });
   };
 
@@ -64,7 +68,7 @@ class UserController {
       .then((user) => {
         if (user) {
           res.json({
-            message: `User ${user.fullname} deleted`,
+            message: `User ${user.firstname} ${user.lastname} deleted`,
           });
         } else {
           res.status(404).json({
@@ -83,7 +87,8 @@ class UserController {
     console.log("user create");
     const postData = {
       email: req.body.email,
-      fullname: req.body.fullname,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
       password: req.body.password,
     };
 

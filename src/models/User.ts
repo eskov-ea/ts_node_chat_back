@@ -5,7 +5,8 @@ import date from "date-fns";
 
 export interface IUser extends Document {
   email: string;
-  fullname: string;
+  firstname: string;
+  lastname: string;
   password: string;
   confirmed: boolean;
   avatar: string;
@@ -22,9 +23,13 @@ const UserSchema = new Schema(
       validate: [validator.isEmail, "Invalid email"],
       unique: true,
     },
-    fullname: {
+    firstname: {
       type: String,
-      required: "Fullname is required",
+      required: "First name is required",
+    },
+    lastname: {
+      type: String,
+      required: "Last name is required",
     },
     password: {
       type: String,

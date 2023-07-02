@@ -1,8 +1,8 @@
 import express from "express";
 import {Server} from "socket.io";
-
 import { MessageModel, DialogModel } from "../models/index.js";
 import { IMessage } from "../models/Message.js";
+import { IDialog } from "../models/Dialog.js";
 
 interface MessageControllerI {
   create: Function;
@@ -43,11 +43,30 @@ class MessageController implements MessageControllerI {
   getMessages = (req: express.Request, res: express.Response): void => {
     const dialogId: string = req.query.dialog as string;
     const userId: string = req.query._id as string;
+
+    //TODO: check if user has access to the dialog
+    // DialogModel.findOne({_id: dialogId})
+    //   .exec(function (err, dialog) {
+    //     if (err) {
+    //       return res.status(404).json({
+    //         status: "error",
+    //         message: "Messages not found",
+    //       });
+    //     } else if (dialog) {
+        
+    //       if (dialog.author == userId ) {
+
+    //       } 
+    //       if (is<IUser>(dialog.partners))
+    //     }
+    //   });
+
+
     this.updateReadStatus(res, userId, dialogId);
     console.log("Get messages:  " + userId + "  " + dialogId);
     
     MessageModel.find({ dialog: dialogId })
-     // .sort({"updatedAt": -1})
+      .sort({"updatedAt": -1})
       .populate(["dialog", "user", "attachments"])
       .sort({"createdAt": -1})
       .exec(function (err, messages) {

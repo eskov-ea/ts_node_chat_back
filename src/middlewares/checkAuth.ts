@@ -25,8 +25,6 @@ export default (
     if (token == null) {
       token = req.body.token;
     }
-
-    console.log("token  -->  " + token);
     if (token) {
       token = token?.replace('Bearer ', '');
       verifyJWTToken(token)

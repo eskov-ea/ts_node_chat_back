@@ -1,5 +1,4 @@
-import mngs from 'mongoose';
-const {Schema, model} = mngs;
+import mongoose, { Schema, Document } from "mongoose";
 import { IMessage } from "./Message";
 import { IDialogRole } from './DialogRole';
 import { IUser } from "./User";
@@ -7,7 +6,7 @@ import { IDialogType } from './DialogType';
 
 
 export interface IDialog extends Document {
-  partners: IUser | string [];
+  partners: IUser [] | string [];
   author: IUser | string;
   chatRoles: IDialogRole[];
   lastMessage: IMessage | string;
@@ -23,13 +22,13 @@ const DialogSchema = new Schema(
     chatRoles: {type: Schema.Types.ObjectId, ref: "DialogRole"},
     lastMessage: { type: Schema.Types.ObjectId, ref: "Message" },
     name: { type: String, require: false, default: "Chat between two users" },
-    dialogType: { type: Schema.Types.ObjectId, ref:"DialogType", require: true }
+    dialog_type: { type: Schema.Types.ObjectId, ref:"DialogType", require: true }
   },
   {
     timestamps: true,
   }
 );
 
-const DialogModel = model("Dialog", DialogSchema);
+const DialogModel = mongoose.model<IDialog>("Dialog", DialogSchema);
 
 export default DialogModel;
